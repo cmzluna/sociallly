@@ -1,16 +1,12 @@
-import Link from 'next/link'
+import Link from "next/link";
 
-const Timeline = ({userName}) => {
+const Timeline = () => {
   return (
     <>
-  <h1>timeline of ${userName}</h1>
-  <Link href='/'>Go home </Link>
+      <h1>timeline </h1>
+      <Link href="/">Go home </Link>
     </>
   );
 };
-
-Timeline.getInitialProps = () => {
-
-}
 
 export default Timeline;
