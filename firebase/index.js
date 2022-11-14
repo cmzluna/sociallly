@@ -5,6 +5,13 @@ import {
   GithubAuthProvider,
   onAuthStateChanged as hasAuthStateChanged,
 } from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  Timestamp,
+} from "firebase/firestore";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -18,6 +25,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const articlesCol = collection(db, "articles");
 
 const mapUserFromFirebase = (user) => {
   const { displayName, email, photoURL, uid, reloadUserInfo } = user;
@@ -32,12 +42,12 @@ const mapUserFromFirebase = (user) => {
   };
 };
 
-const auth = getAuth(app);
-
 export const onAuthStateChanged = (onChange) => {
   return hasAuthStateChanged(auth, (user) => {
-    const mappedUser = mapUserFromFirebase(user);
-    onChange(mappedUser);
+    if (user) {
+      const mappedUser = mapUserFromFirebase(user);
+      onChange(mappedUser);
+    }
   });
 };
 
@@ -57,5 +67,36 @@ export const gitHubLogin = () => {
     // ...
 
     console.log("ERROR!!! = ", errorCode, errorMessage, email, credential);
+  });
+};
+
+export const addArticle = ({ avatar, content, userId, userName }) =>
+  addDoc(articlesCol, {
+    avatar,
+    content,
+    userId,
+    userName,
+    createdAt: Timestamp.fromDate(new Date()),
+    likesCount: 0,
+    sharedCount: 0,
+  });
+
+export const fetchLatestArticles = async () => {
+  const querySnapshot = await getDocs(articlesCol);
+
+  return querySnapshot.docs.map((doc) => {
+    const data = doc.data();
+    const id = doc.id;
+    const { createdAt = "" } = data;
+
+    const date = new Date(createdAt.seconds * 1000);
+
+    const newDate = new Intl.DateTimeFormat("es-ES").format(date);
+
+    return {
+      ...data,
+      id,
+      createdAt: newDate,
+    };
   });
 };
