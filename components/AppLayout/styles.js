@@ -37,11 +37,13 @@ export default css`
     transition: opacity 0.3s ease;
   }
   main {
+    position: relative;
     background: #fff;
     border-radius: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     height: 100%;
     width: 100%;
+    overflow-y: hidden;
   }
   @media (min-width: ${breakpoints.mobile}) {
     main {

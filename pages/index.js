@@ -2,28 +2,27 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import AppLayout from "../components/AppLayout";
-import Button from "../components/Button";
-import Logo from "../components/Icons/Logo";
-import { gitHubLogin, onAuthStateChanged } from "./firebase/client";
+import AppLayout from "/components/AppLayout";
+import Button from "/components/Button";
+import Logo from "/components/Icons/Logo";
+import { gitHubLogin, onAuthStateChanged } from "/firebase";
+import Router, { useRouter } from "next/router";
 
 export default function Home() {
   const [user, setUser] = useState(null);
+  const router = useRouter();
   console.log("USER IS ==> ", user);
 
   useEffect(() => {
-    //onAuthStateChanged(setUser);
-    console.log("*****", typeof onAuthStateChanged(setUser));
-
-    // onAuthStateChanged(() => {})
+    onAuthStateChanged(setUser);
   }, []);
 
+  useEffect(() => {
+    user && router.replace("/home");
+  }, [user]);
+
   const handleClick = () => {
-    gitHubLogin().then((user) => {
-      const { avatar, userName, name } = user;
-      setUser(user);
-      console.log("USER IS ==> ", user);
-    });
+    gitHubLogin().catch((err) => console.log("ERROR! ", err));
   };
 
   return (
@@ -38,12 +37,19 @@ export default function Home() {
         <main>
           <h1>Welcome to</h1>
           <Link href="/timeline">timeline</Link>
+          {user === undefined && <span>loading...</span>}
           {user === null && (
             <Button onClick={handleClick}>
               {" "}
               <Logo width={60} height={40} />
               Login
             </Button>
+          )}
+          {user && user.avatar && (
+            <div>
+              <Image src={user.avatar} alt="" width="123" height="123" />
+              <strong>{user.name}</strong>
+            </div>
           )}
         </main>
       </AppLayout>
