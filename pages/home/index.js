@@ -3,8 +3,13 @@ import Article from "components/Article";
 import { useEffect, useState } from "react";
 import useUser from "hooks/useUser";
 import { fetchLatestArticles } from "/firebase";
+import Link from "next/link";
+import Home from "components/Icons/Home";
+import Search from "components/Icons/Search";
+import Create from "components/Icons/Create";
+import { colors } from "styles/theme";
 
-const Home = () => {
+const HomePage = () => {
   const [timeline, setTimeline] = useState([]);
   const user = useUser();
 
@@ -32,7 +37,19 @@ const Home = () => {
             )
           )}
         </section>
-        <nav>navbar here</nav>
+        <nav>
+          <div>
+            <Link href="/home">
+              <Home width={32} height={32} stroke="#09f" />
+            </Link>
+          </div>
+          <div>
+            <Link href="/home">
+              <Home width={32} height={32} stroke="#09f" />
+            </Link>
+          </div>
+        </nav>
+
         <style jsx>{`
           header {
             align-items: center;
@@ -65,8 +82,24 @@ const Home = () => {
             border-top: 1px solid #ccc;
             background-color: white;
             height: 49px;
+            display: flex;
             position: absolute;
             width: 100%;
+          }
+          nav div {
+            align-items: center;
+            display: flex;
+            flex: 1 1 auto;
+            height: 100%;
+            justify-content: center;
+          }
+          nav div:hover {
+            background: radial-gradient(#0099ff22 16%, transparent 20%);
+            background-size: 180px 180px;
+            background-position: center;
+          }
+          nav span:hover > :global(svg) {
+            stroke: ${colors.primary};
           }
         `}</style>
       </AppLayout>
@@ -74,4 +107,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomePage;

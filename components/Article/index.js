@@ -1,20 +1,17 @@
 import Avatar from "components/Avatar";
+import useTimeAgo from "hooks/useTimeAgo";
 
 const Article = ({ createdAt, id, userName, avatar, content, userId }) => {
-  console.log("====================================");
-  console.log(createdAt);
-  console.log("====================================");
+  const timeAgo = useTimeAgo(createdAt);
+
   return (
     <>
       <article key={id}>
         <Avatar alt={userName} src={avatar} text={userName} />
 
         <div>
+          <date>{timeAgo}</date>
           <p>{content}</p>
-        </div>
-        <div>
-          {" "}
-          <p>{createdAt}</p>
         </div>
       </article>
       <style jsx>{`

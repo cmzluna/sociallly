@@ -11,7 +11,10 @@ import {
   getDocs,
   addDoc,
   Timestamp,
+  query,
+  orderBy,
 } from "firebase/firestore";
+import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -28,6 +31,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const articlesCol = collection(db, "articles");
+
+// Firebase storage
+const storage = getStorage();
 
 const mapUserFromFirebase = (user) => {
   const { displayName, email, photoURL, uid, reloadUserInfo } = user;
@@ -70,33 +76,41 @@ export const gitHubLogin = () => {
   });
 };
 
-export const addArticle = ({ avatar, content, userId, userName }) =>
+export const addArticle = ({ avatar, content, userId, userName, img }) =>
   addDoc(articlesCol, {
     avatar,
     content,
     userId,
     userName,
+    img,
     createdAt: Timestamp.fromDate(new Date()),
     likesCount: 0,
     sharedCount: 0,
   });
 
 export const fetchLatestArticles = async () => {
-  const querySnapshot = await getDocs(articlesCol);
+  const articlesQuery = query(articlesCol, orderBy("createdAt", "desc"));
+  const querySnapshot = await getDocs(articlesQuery);
 
   return querySnapshot.docs.map((doc) => {
     const data = doc.data();
     const id = doc.id;
     const { createdAt = "" } = data;
 
-    const date = new Date(createdAt.seconds * 1000);
-
-    const newDate = new Intl.DateTimeFormat("es-ES").format(date);
+    const newDate = createdAt.toDate();
+    console.log("NEWDATE = ", newDate);
 
     return {
       ...data,
       id,
-      createdAt: newDate,
+      createdAt: +newDate,
     };
   });
+};
+
+export const uploadImage = (img) => {
+  console.log("img name -> ", img.name);
+  const imgRef = ref(storage, `images/${img.name}`);
+
+  return uploadBytesResumable(imgRef, img);
 };
