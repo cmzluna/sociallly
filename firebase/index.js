@@ -13,20 +13,23 @@ import {
   Timestamp,
   query,
   orderBy,
+  onSnapshot,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytesResumable } from "firebase/storage";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBEKPJrdyhk11UmDUs6uMjazkV-3URSOtE",
-  authDomain: "socially-2553f.firebaseapp.com",
-  projectId: "socially-2553f",
-  storageBucket: "socially-2553f.appspot.com",
-  messagingSenderId: "820864424214",
-  appId: "1:820864424214:web:b30888db5c74f666e25837",
-  measurementId: "G-MRHWGTLYD0",
-};
+// const firebaseConfig = {
+//   apiKey: "AIzaSyBEKPJrdyhk11UmDUs6uMjazkV-3URSOtE",
+//   authDomain: "socially-2553f.firebaseapp.com",
+//   projectId: "socially-2553f",
+//   storageBucket: "socially-2553f.appspot.com",
+//   messagingSenderId: "820864424214",
+//   appId: "1:820864424214:web:b30888db5c74f666e25837",
+//   measurementId: "G-MRHWGTLYD0",
+// };
 
+const firebaseConfig = JSON.parse(process.env.NEXT_PUBLIC_CLIENT_CONFIG);
+console.log("==== usando esta config =====", firebaseConfig);
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -88,28 +91,36 @@ export const addArticle = ({ avatar, content, userId, userName, img }) =>
     sharedCount: 0,
   });
 
+const mapArticleFromFirebase = (doc) => {
+  const data = doc.data();
+  const id = doc.id;
+  const { createdAt = "" } = data;
+  const newDate = createdAt.toDate();
+
+  return {
+    ...data,
+    id,
+    createdAt: +newDate,
+  };
+};
+export const listenLatestArticles = (callback) => {
+  const articlesQuery = query(articlesCol, orderBy("createdAt", "desc"));
+
+  return onSnapshot(articlesQuery, ({ docs }) => {
+    const mappedArticles = docs.map(mapArticleFromFirebase);
+
+    callback(mappedArticles);
+  });
+};
+
 export const fetchLatestArticles = async () => {
   const articlesQuery = query(articlesCol, orderBy("createdAt", "desc"));
   const querySnapshot = await getDocs(articlesQuery);
 
-  return querySnapshot.docs.map((doc) => {
-    const data = doc.data();
-    const id = doc.id;
-    const { createdAt = "" } = data;
-
-    const newDate = createdAt.toDate();
-    console.log("NEWDATE = ", newDate);
-
-    return {
-      ...data,
-      id,
-      createdAt: +newDate,
-    };
-  });
+  return querySnapshot.docs.map((doc) => mapArticleFromFirebase(doc));
 };
 
 export const uploadImage = (img) => {
-  console.log("img name -> ", img.name);
   const imgRef = ref(storage, `images/${img.name}`);
 
   return uploadBytesResumable(imgRef, img);

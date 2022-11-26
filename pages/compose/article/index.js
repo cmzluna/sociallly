@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import AppLayout from "components/AppLayout";
+import NavBar from "components/NavBar";
 import Button from "components/Button";
 import useUser from "hooks/useUser";
-
 import { addArticle, uploadImage } from "/firebase";
 import { useRouter } from "next/router";
 import { getDownloadURL } from "firebase/storage";
@@ -44,7 +44,6 @@ export default function ComposeArticle() {
       };
       const onError = () => {};
       const onComplete = () => {
-        console.log("onComplete");
         getDownloadURL(task.snapshot.ref).then(setImgUrl);
       };
 
@@ -102,7 +101,7 @@ export default function ComposeArticle() {
           <div className="wrapper">
             <textarea
               onChange={handleChange}
-              placeholder="Escribe tu pensamiento..."
+              placeholder="Write your thought..."
               value={message}
               onDragLeave={handleDragLeave}
               onDragEnter={handleDragEnter}
@@ -124,6 +123,7 @@ export default function ComposeArticle() {
             <Button disabled={isButtonDisabled}>Grabar!</Button>
           </div>
         </form>
+        <NavBar />
       </AppLayout>
       <style jsx>{`
         .wrapper {

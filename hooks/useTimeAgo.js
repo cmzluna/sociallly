@@ -7,8 +7,10 @@ const DATE_UNITS = [
   ["second", 1],
 ];
 
+const isRelativeTimeFormatSupported =
+  typeof Intl !== "undefined" && Intl.RelativeTimeFormat;
+
 const getDateDiffs = (timestamp) => {
-  console.log("getDateDiffs");
   const now = Date.now();
   const elapsed = (timestamp - now) / 1000;
 
@@ -21,6 +23,10 @@ const getDateDiffs = (timestamp) => {
 };
 
 export default function useTimeAgo(timestamp) {
+  // if (!timestamp) {
+  //   return null;
+  // }
+
   const [timeago, setTimeago] = useState(() => getDateDiffs(timestamp));
 
   useEffect(() => {
@@ -31,6 +37,10 @@ export default function useTimeAgo(timestamp) {
 
     return () => clearInterval(interval);
   }, [timestamp]);
+
+  if (!isRelativeTimeFormatSupported) {
+    return formatDate(timestamp);
+  }
 
   const rtf = new Intl.RelativeTimeFormat(
     "es",
