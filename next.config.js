@@ -9,6 +9,12 @@ const nextConfig = {
         port: "",
         pathname: "/u/**",
       },
+      {
+        protocol: "https",
+        hostname: "cataas.com",
+        port: "",
+        pathname: "/cat/**",
+      },
     ],
   },
 };

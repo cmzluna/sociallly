@@ -2,19 +2,21 @@ import AppLayout from "components/AppLayout";
 import Article from "components/Article";
 import { useEffect, useState } from "react";
 import useUser from "hooks/useUser";
-import { fetchLatestArticles } from "/firebase";
-import Link from "next/link";
-import Home from "components/Icons/Home";
-import Search from "components/Icons/Search";
-import Create from "components/Icons/Create";
+import { fetchLatestArticles, listenLatestArticles } from "/firebase";
 import { colors } from "styles/theme";
+import NavBar from "components/NavBar";
 
 const HomePage = () => {
   const [timeline, setTimeline] = useState([]);
   const user = useUser();
 
   useEffect(() => {
-    user && fetchLatestArticles().then(setTimeline);
+    let unsubscribe;
+    if (user) {
+      unsubscribe = listenLatestArticles(setTimeline);
+    }
+
+    return () => unsubscribe && unsubscribe();
   }, [user]);
 
   return (
@@ -25,30 +27,21 @@ const HomePage = () => {
         </header>
         <section>
           {timeline.map(
-            ({ id, userName, avatar, content, userId, createdAt }) => (
+            ({ id, userName, avatar, content, userId, createdAt, img }) => (
               <Article
+                key={id}
                 avatar={avatar}
                 id={id}
                 content={content}
                 userName={userName}
                 userId={userId}
                 createdAt={createdAt}
+                img={img}
               />
             )
           )}
         </section>
-        <nav>
-          <div>
-            <Link href="/home">
-              <Home width={32} height={32} stroke="#09f" />
-            </Link>
-          </div>
-          <div>
-            <Link href="/home">
-              <Home width={32} height={32} stroke="#09f" />
-            </Link>
-          </div>
-        </nav>
+        <NavBar />
 
         <style jsx>{`
           header {
